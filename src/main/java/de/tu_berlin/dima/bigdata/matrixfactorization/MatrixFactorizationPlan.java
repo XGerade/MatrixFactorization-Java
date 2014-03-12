@@ -1,3 +1,10 @@
+/*
+ * Project: MatrixFactorization
+ * @author Fangzhou Yang
+ * @author Xugang Zhou
+ * @version 1.0
+ */
+
 package de.tu_berlin.dima.bigdata.matrixfactorization;
 
 import de.tu_berlin.dima.bigdata.matrixfactorization.itemrating.ItemRatingVectorMapper;
@@ -28,6 +35,9 @@ import eu.stratosphere.pact.common.type.base.PactInteger;
 import eu.stratosphere.pact.common.type.base.PactString;
 import eu.stratosphere.pact.generic.contract.IterationContract;
 
+/*
+ * This Class is the the "plan" class of this project.
+ */
 public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDescription{
 	  
 	private final int numIterations = 20;
@@ -41,6 +51,18 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 	public String getDescription() {
 		return "Usage: [inputPath] [outputPath] ([numSubtasks])";
 	}
+	  /*
+	   * This method defines how the data would be operated.
+	   * @return The whole scala-plan
+	   * @param args(0) Number of subtasks to specify parallelism
+	   * @param args(1) Path to input file
+	   * @param args(2) Path to output file
+	   * @param args(3) lambda which is used during ALS learning
+	   * @param args(4) Number of features pre-set for learning
+	   * @param args(5) Number of Users of input
+	   * @param args(6) Number of Items of input
+	   * @param args(7) Number of Iterations to run in ALS 
+	   */
 	@Override
 	public Plan getPlan(String... args) {
 		String inputPath = args.length >= 1 ? args[0] : "";
@@ -51,6 +73,9 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 		
 		System.out.println("Processing.. start iteration..");
 		
+	    /*
+	     * Get item-rating-vector 
+	     */
 		MapContract itemRatingVectorMapper = MapContract
 				.builder(ItemRatingVectorMapper.class).input(source)
 				.name("Item Rating Vector Mapper").build();
@@ -59,6 +84,9 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 				.builder(ItemRatingVectorReducer.class, PactInteger.class, 0)
 				.input(itemRatingVectorMapper).name("Item Rating Vector Reducer").build();
 		
+	    /*
+	     * Get user-rating-vector
+	     */
 		MapContract userRatingVectorMapper = MapContract
 				.builder(UserRatingVectorMapper.class).input(source)
 				.name("User Rating Vector Mapper").build();
@@ -67,6 +95,9 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 				.builder(UserRatingVectorReducer.class, PactInteger.class, 0)
 				.input(userRatingVectorMapper).name("User Rating Vector Reducer").build();
 		
+	    /*
+	     * Initialize item-feature-matrix with random value
+	     */
 		MapContract initItemFeatureMatrixMapper = MapContract
 				.builder(InitItemFeatureMatrixMapper.class).input(itemRatingVectorReducer)
 				.name("init Item Feature Matrix Mapper").build();
@@ -75,6 +106,9 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 				.builder(ItemFeatureMatrixReducer.class, PactInteger.class, 0)
 				.input(initItemFeatureMatrixMapper).name("init Item Feature Matrix Reducer").build();
 		
+	    /*
+	     * Learn the user-feature-matrix with initialized item-feature-matrix
+	     */
 		userFeatureMatrixCrossers[0] = CrossContract
 				.builder(UserFeatureMatrixCrosser.class).input1(userRatingVectorReducer).input2(initItemFeatureMatrixReducer)
 				.name("User Feature Matrix Update Crosser 1").build();
@@ -83,6 +117,9 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 				.builder(UserFeatureMatrixReducer.class, PactInteger.class, 0).input(userFeatureMatrixCrossers[0])
 				.name("User Feature Matrix Update Reducer 1").build();
 		
+	    /*
+	     * Continue to Alternative-Least-Sqaure (ALS) learning with numIter iterations
+	     */
 		for(int i = 1; i < numIterations; i ++){
 //			System.out.println("iteration :" + i);
 			itemFeatureMatrixCrossers[i-1] = CrossContract
@@ -110,12 +147,18 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 				.builder(ItemFeatureMatrixReducer.class, PactInteger.class, 0).input(itemFeatureMatrixCrossers[numIterations-1])
 				.name("Item Feature Matrix Update Reducer " + (numIterations)).build();	
 		
+	    /*
+	     * Use learned user- and item-feature-vectors to do the prediction of rating
+	     */
 		CrossContract predictCrosser = CrossContract.builder(PredictionCrosser.class)
 				.input1(itemFeatureMatrixCrossers[numIterations-1])
 				.input2(userFeatureMatrixCrossers[numIterations-1])
 				.name("Predict Crosser")
 				.build();
 		
+	    /*
+	     * Put the predicted-rating result to output stream
+	     */
 		FileDataSink sink = new FileDataSink(RecordOutputFormat.class, outputPath, predictCrosser, "Rating Prediction");
 		RecordOutputFormat.configureRecordFormat(sink)
 			.recordDelimiter('\n')
@@ -125,17 +168,20 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 			.field(PactFloat.class, 2);
 		
 
+	    /*
+	     * Return the plan
+	     */
 		Plan plan = new Plan(sink, "Rating Prediction Computation");
 		plan.setDefaultParallelism(numSubtasks);
 
 		return plan;
 	}
+	/*
+	 * This method enables you to run this project locally.
+	 * Run this object with the parameters specified below will result in run this project locally.
+	 */
 	public static void main(String[] args) throws Exception {
 
-//		String inputPath = "file://"+System.getProperty("user.dir") +"/datasets/10m/r1.train";
-//
-//		String outputPath = "file://"+System.getProperty("user.dir") +"/results/10m/Prediction__r1_i=2";
-		
 		String inputPath = "file://"+System.getProperty("user.dir") +"/datasets/100k/ua.base";
 
 		String outputPath = "file://"+System.getProperty("user.dir") +"/results/100k/Prediction_ua_i=20.result";
@@ -145,10 +191,8 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 		System.out.println("Writing output to " + outputPath);
 
 		Plan toExecute = new MatrixFactorizationPlan().getPlan(inputPath, outputPath);
-//		toExecute.setDefaultParallelism(1);
+
 		Util.executePlan(toExecute);
-		
-		// Util.deleteAllTempFiles();
 	}
 	
 }
