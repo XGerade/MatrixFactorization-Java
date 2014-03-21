@@ -1,3 +1,10 @@
+/*
+ * Project: MatrixFactorization
+ * @author Fangzhou Yang
+ * @author Xugang Zhou
+ * @version 1.0
+ */
+
 package de.tu_berlin.dima.bigdata.matrixfactorization.util;
 
 import java.util.regex.Pattern;
@@ -8,7 +15,9 @@ import eu.stratosphere.nephele.client.JobExecutionResult;
 import eu.stratosphere.pact.client.LocalExecutor;
 import eu.stratosphere.pact.common.plan.Plan;
 
-
+/*
+ * This object defines common variables for in this project
+ */
 public class Util{
 	public static final int USER_ID_POS = 0;
 	public static final int ITEM_ID_POS = 1;

@@ -1,3 +1,10 @@
+/*
+ * Project: MatrixFactorization
+ * @author Fangzhou Yang
+ * @author Xugang Zhou
+ * @version 1.0
+ */
+
 package de.tu_berlin.dima.bigdata.matrixfactorization.type;
 
 import java.io.DataInput;
@@ -10,10 +17,8 @@ import org.apache.mahout.math.VectorWritable;
 import eu.stratosphere.pact.common.type.Value;
 
 
-/**
- * Wrapping Class, which wraps the class VectorWritable of the package mahout.math
- * @author titicaca
- *
+/*
+ * This Pact class is a wrapper of Vector which could be passed between on stratosphere
  */
 @SuppressWarnings("serial")
 public class PactVector implements Value{
@@ -24,6 +29,10 @@ public class PactVector implements Value{
 		
 	}
 	
+	/*
+	 * This constructor additionally set the precision of vector
+	 * which when set to true, it will use float instead of double
+	 */
 	public PactVector(boolean writesLaxPrecision){
 		vectorWritable.setWritesLaxPrecision(writesLaxPrecision);
 	}

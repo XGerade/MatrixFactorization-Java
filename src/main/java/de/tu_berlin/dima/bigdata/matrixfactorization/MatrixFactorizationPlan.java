@@ -10,13 +10,11 @@ package de.tu_berlin.dima.bigdata.matrixfactorization;
 import de.tu_berlin.dima.bigdata.matrixfactorization.itemrating.ItemRatingVectorMapper;
 import de.tu_berlin.dima.bigdata.matrixfactorization.itemrating.ItemRatingVectorReducer;
 import de.tu_berlin.dima.bigdata.matrixfactorization.prediction.PredictionCrosser;
-import de.tu_berlin.dima.bigdata.matrixfactorization.solve.FeatureMatrixUpdatePlan;
 import de.tu_berlin.dima.bigdata.matrixfactorization.solve.InitItemFeatureMatrixMapper;
 import de.tu_berlin.dima.bigdata.matrixfactorization.solve.ItemFeatureMatrixCrosser;
 import de.tu_berlin.dima.bigdata.matrixfactorization.solve.ItemFeatureMatrixReducer;
 import de.tu_berlin.dima.bigdata.matrixfactorization.solve.UserFeatureMatrixCrosser;
 import de.tu_berlin.dima.bigdata.matrixfactorization.solve.UserFeatureMatrixReducer;
-import de.tu_berlin.dima.bigdata.matrixfactorization.type.PactVector;
 import de.tu_berlin.dima.bigdata.matrixfactorization.userrating.UserRatingVectorMapper;
 import de.tu_berlin.dima.bigdata.matrixfactorization.userrating.UserRatingVectorReducer;
 import de.tu_berlin.dima.bigdata.matrixfactorization.util.Util;
@@ -32,8 +30,6 @@ import eu.stratosphere.pact.common.plan.PlanAssembler;
 import eu.stratosphere.pact.common.plan.PlanAssemblerDescription;
 import eu.stratosphere.pact.common.type.base.PactFloat;
 import eu.stratosphere.pact.common.type.base.PactInteger;
-import eu.stratosphere.pact.common.type.base.PactString;
-import eu.stratosphere.pact.generic.contract.IterationContract;
 
 /*
  * This Class is the the "plan" class of this project.
@@ -54,14 +50,9 @@ public class MatrixFactorizationPlan implements PlanAssembler, PlanAssemblerDesc
 	  /*
 	   * This method defines how the data would be operated.
 	   * @return The whole scala-plan
-	   * @param args(0) Number of subtasks to specify parallelism
-	   * @param args(1) Path to input file
-	   * @param args(2) Path to output file
-	   * @param args(3) lambda which is used during ALS learning
-	   * @param args(4) Number of features pre-set for learning
-	   * @param args(5) Number of Users of input
-	   * @param args(6) Number of Items of input
-	   * @param args(7) Number of Iterations to run in ALS 
+	   * @param args(0) Path to input file
+	   * @param args(1) Path to output file
+	   * @param args(2) Number of subtasks to specify parallelism
 	   */
 	@Override
 	public Plan getPlan(String... args) {

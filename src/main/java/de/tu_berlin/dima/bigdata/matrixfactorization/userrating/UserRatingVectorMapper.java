@@ -1,3 +1,10 @@
+/*
+ * Project: MatrixFactorization
+ * @author Xugang Zhou
+ * @author Fangzhou Yang
+ * @version 1.0
+ */
+
 package de.tu_berlin.dima.bigdata.matrixfactorization.userrating;
 
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -11,15 +18,31 @@ import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.base.PactInteger;
 import eu.stratosphere.pact.common.type.base.PactString;
 
+/*
+ * This Map class maps each user-item-rating to a user-feature-vector 
+ * which contains only information of the item's rating
+ */
 public class UserRatingVectorMapper extends MapStub{
 	
 	
-    private final Vector ratings = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
+    /*
+     * The itemID starts from 1
+     * So the initialized cardinality would be set to numItems + 1
+     */
+    private final Vector ratings = new RandomAccessSparseVector(Util.numItems + 1, 1);
     
 	private final PactRecord outputRecord = new PactRecord();
+    /*
+     * Set Vector to use float which double is not supported by stratosphere
+     */
 	private final PactVector pactVector = new PactVector(true);
 	private final PactInteger pactUserID = new PactInteger();
 
+	/*
+	 * This override method define how the map function works
+	 * @param in:(userID, itemID, rating) A rating entry
+	 * @return (userID, user-feature-vector) The user-rating-vector which contains only rating information of that item  
+	 */
 	@Override
 	public void map(PactRecord record, Collector<PactRecord> collector)
 			throws Exception {
@@ -32,15 +55,12 @@ public class UserRatingVectorMapper extends MapStub{
 		ratings.setQuick(itemID, rating);
 		pactUserID.setValue(userID);
 		pactVector.set(ratings);
-		
-//		System.out.println(pactUserID + " " + pactVector.vectorWritable.toString());
 
 		outputRecord.setField(0, pactUserID);
 		outputRecord.setField(1, pactVector);
 	
 		collector.collect(outputRecord);
 		
-		// prepare instance for reuse
 		ratings.setQuick(itemID, 0.0d);
 	}
 	

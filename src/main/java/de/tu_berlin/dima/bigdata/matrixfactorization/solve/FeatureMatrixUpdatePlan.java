@@ -1,7 +1,6 @@
 package de.tu_berlin.dima.bigdata.matrixfactorization.solve;
 
 import de.tu_berlin.dima.bigdata.matrixfactorization.itemrating.ItemRatingVectorMapper;
-import de.tu_berlin.dima.bigdata.matrixfactorization.itemrating.ItemRatingVectorPlan;
 import de.tu_berlin.dima.bigdata.matrixfactorization.itemrating.ItemRatingVectorReducer;
 import de.tu_berlin.dima.bigdata.matrixfactorization.type.PactVector;
 import de.tu_berlin.dima.bigdata.matrixfactorization.userrating.UserRatingVectorMapper;

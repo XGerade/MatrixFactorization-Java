@@ -1,12 +1,7 @@
 package de.tu_berlin.dima.bigdata.matrixfactorization.itemrating;
 
-import java.io.IOException;
-
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 
 import de.tu_berlin.dima.bigdata.matrixfactorization.type.PactVector;
 import eu.stratosphere.pact.common.stubs.Collector;
